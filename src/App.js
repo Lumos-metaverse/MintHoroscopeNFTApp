@@ -1,5 +1,6 @@
 import Logo from "./components/Logo";
 import Header from "./components/Header";
+import {NFTStorage,File} from 'nft.storage';
 import './App.css';
 import React, {useState,useEffect} from "react";
 
@@ -19,8 +20,7 @@ const northnode = new Map([["Aries", ["01271949", "07261950", "08201967", "04191
 ["Capricorn", ["10101953","04021955","04281972","10271973","11191990","08011992","08212009","03022011","03272028","09232029"]], 
 ["Aquarius", ["03291952","10091953","11031970","04271972","05231989","11181990","12192007","08212009","04282026","03262028"]], 
 ["Pisces", ["07271950","03281952","04201969","11021970","12031987","05221989","06232006","12182007","01122024","04272026"]]]);
-
-//const client = new NFTStorage({ token: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJkaWQ6ZXRocjoweDlCRDhBODJiRDNGMjcyRjFCZDI1REYwNWZlOUZEMEM5QTRhYjA3QkYiLCJpc3MiOiJuZnQtc3RvcmFnZSIsImlhdCI6MTY5OTMzNzY3NDUyOCwibmFtZSI6Ikhvcm9zY29wZSBORlQifQ.p3WMoAfmaTDuczS_8FwUWyQt1iMPM-gZlYwAUtID2WI' })
+const client = new NFTStorage({ token: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJkaWQ6ZXRocjoweDlCRDhBODJiRDNGMjcyRjFCZDI1REYwNWZlOUZEMEM5QTRhYjA3QkYiLCJpc3MiOiJuZnQtc3RvcmFnZSIsImlhdCI6MTY5OTMzNzY3NDUyOCwibmFtZSI6Ikhvcm9zY29wZSBORlQifQ.p3WMoAfmaTDuczS_8FwUWyQt1iMPM-gZlYwAUtID2WI' })
 
 function App() {
   const [date, setDate] = useState("1992-08-31");
@@ -31,8 +31,12 @@ function App() {
   const [RisingSign, setRisingSign] = useState(null);
   const [ChartRuler, setChartRuler] = useState(null);
   const [NorthNodeSign, setNorthNodeSign] = useState(null);
-  const allNFTs = [signs.get(SunSign),signs.get(RisingSign),planets.get(ChartRuler),signs.get(NorthNodeSign)];
+  //const allNFTs = [signs.get(SunSign),signs.get(RisingSign),planets.get(ChartRuler),signs.get(NorthNodeSign)];
   const [isMinting, setIsMinting] = useState(false);
+  const [isStoring, setIsStoring] = useState(false);
+  const [name, setName] = useState("");
+  const [description, setDescription] = useState("");
+  const [file, setFile] = useState(null);
 
   const ConnectWallet = async () => {
     try {
@@ -59,23 +63,26 @@ function App() {
       calculatenorthnode(date);
     });
 
+    const storeNFT = async() => {
+      const metadata = await client.store({name:name, description:description, image: new File([file], 'nft.png', {type: 'image/png'})});
+      const cid = metadata.url.replace('ipfs://','');
+      console.log(cid);
+    }
+
     async function mintNFT(allNFTs) {
       setIsMinting(true);
-      try {
-        for (var i = 0; i < allNFTs.length; i++) {
-          //const transaction = await NFTContract.mintNFT(account, SunSign);
-          console.log("dumbass");
-        // Wait for the transaction to be confirmed
+      /*try {
+        //for (var i = 0; i < allNFTs.length; i++) {
+          //const transaction = await NFTContract.mintNFT(account, allNFTs[i]);
+        // Pay gas fees and wait for the transaction to be confirmed
         //await transaction.wait();
-        }
-        
-    
+        //}
         // Transaction is confirmed, you can perform any additional actions here if needed
       } catch (e) {
         // Handle errors
       } finally {
         setIsMinting(false);
-      }
+      }*/
     }
 
     function calculateRisingSign(time) {
@@ -263,17 +270,37 @@ function App() {
           : (<p> Wallet Address Connected </p>)}
       </div>
       <div>
-      <input type = "text" placeholder = "Enter your full name" onChange={(e)=>(setFullName(e.target.value))}/>
-      <br />
-      <br />
-      <input onChange={handleDateInput} value={date} type="date" id="dob" />
-      <input onChange={handleTimeInput} value={time} type="time" id="tob" />
+          <label> <b>Store Assets on NFTStorage</b> </label>
+          <br />
+          <label>NFT Name: &nbsp;</label>
+          <input type = "text" value = {name} onChange={(e) => setName(e.target.value)} placeholder = "Name"/> 
+          <br />
+          <label>NFT Description: &nbsp;</label>
+          <input type = "text" value = {description} onChange={(e) => setDescription(e.target.value)} placeholder = "Description"/>
+          <br />
+          <label>NFT File: &nbsp;</label>
+          <input type = "file" onChange={(e) => setFile(e.target.files[0])} placeholder = "File Path"/>
           <br />
           <br />
-          <label> <b> Full Name: </b> {FullName}</label>
+          <button disabled={isStoring} onClick={storeNFT}> {isMinting ? "Storing..." : "Store"} </button>
           <br />
           <br />
-          <label> <b>Sun Sign &emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; Rising Sign &emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; Chart Ruler &emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; North Node </b> </label> <br /> <br /> 
+          <br />
+          <label><b>Enter Chart Details</b></label>
+          <br />
+          <label>Enter Full Name: &nbsp;</label>
+          <input type = "text" placeholder = "Enter your full name" onChange={(e)=>(setFullName(e.target.value))}/>
+          <br />
+          <label>Enter Date and Time: &nbsp;</label>
+          <input onChange={handleDateInput} value={date} type="date" id="dob" />
+          <input onChange={handleTimeInput} value={time} type="time" id="tob" />
+          <br />
+          <br />
+          <br />
+          <label><b>Chart Summary</b></label>
+          <br />
+          <label> &emsp; Sun Sign &emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; Rising Sign &emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; Chart Ruler &emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; North Node </label>
+          <br />
           <img src={signs.get(SunSign)} width={225} height={225} alt="Sunsign" />
           <img src={signs.get(RisingSign)} width={225} height={225} alt="Risingsign" />
           <img src={planets.get(ChartRuler)} width={225} height={225} alt="ChartRuler" />
@@ -284,7 +311,6 @@ function App() {
           {isMinting ? "Minting..." : "Mint"}
       </button>
       </div>
-
       </header>
     </div>
   );
