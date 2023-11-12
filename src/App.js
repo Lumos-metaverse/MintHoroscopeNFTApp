@@ -134,7 +134,6 @@ function App() {
       console.log(allNFTs);
     };
     
-
     useEffect(() => {
       calculateSunSign(date);
       calculateRisingSign(time);
