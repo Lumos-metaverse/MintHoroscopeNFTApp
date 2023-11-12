@@ -3,11 +3,15 @@ import Header from "./components/Header";
 import {NFTStorage,File} from 'nft.storage';
 import './App.css';
 import React, {useState,useEffect} from "react";
-
+import { ContractABI, ContractAddress } from "./utils/contractdeets";
+const ethers = require("ethers");
+const {ethereum} = window;
+const allNFTs = [];
 const zodiacSignArray = ['Aries', 'Taurus', 'Gemini', 'Cancer', 'Leo', 'Virgo', 'Libra', 'Scorpio', 'Sagittarius', 'Capricorn', 'Aquarius', 'Pisces'];
-const signs = new Map([["Aries", "https://ipfs.io/ipfs/bafybeigcik7dee57x6qorcdnwkrjpvmamk7n56dibrz6gvlteuhsadaa2e"],["Taurus", "https://ipfs.io/ipfs/bafybeih32ccuhrnw7yjtx33c6t6yjd4catdaqjjicssy332sr5w6ozewci"],["Gemini", "https://ipfs.io/ipfs/bafybeieihjeknxhsdj7mr4f2yewgcz5scaqqzryb3effefjegafcbyq7da"],["Cancer", "https://ipfs.io/ipfs/bafybeiakepu5nmu6vplaa7jy6jfkrtpn6pgww5zundtcdufq3htw55k6zq"],["Leo", "https://ipfs.io/ipfs/bafybeicn6k5bajx5fj7u7mcutgj5oinl2ebkvsqgwf7ce27d7vy2ed5iem"],["Virgo", "https://ipfs.io/ipfs/bafybeibt6taxemqyewvba2mmqti2qrgsih463ge3b43airbazsqifzvf3u"],["Libra", "https://ipfs.io/ipfs/bafybeiajqddi6x7kb4ofj462wqlctmadosfuxpoi7pb7jsjp7izgw5wpgu"],["Scorpio", "https://ipfs.io/ipfs/bafybeiaeva6fira76etfyw2di22h2dpyclmkckf4bx4vt474aidwiedcae"],["Sagittarius", "https://ipfs.io/ipfs/bafybeic5cqo74xayfn4thxscls7cxrwbgdpndwctj4367anmujcoa7lhoe"],
-["Capricorn", "https://ipfs.io/ipfs/bafybeiad7ce3rprl6ywhbbwc42irnhqcgt6jnews7ns5b7zngrfrhccsny"],["Aquarius", "https://ipfs.io/ipfs/bafybeice2zaut53gdkby5u66vntizzqcwba37zphdgo2nxijfyu2t4uteq"],["Pisces", "https://ipfs.io/ipfs/bafybeifywiewyciipi5o7ugrbfhxmjqgmpzhgoqpjicuwf4yvk3cmtw6z4"]]);
-const planets = new Map([["Sun", "https://ipfs.io/ipfs/bafybeifybpvobqhxglgmexlw6c6icdxc6wqwjvwlq675w4upuqgoyzn5ji"],["Moon","https://ipfs.io/ipfs/bafybeibwndegkhfwlzipdcmrrypvfho4lc7byswz7ofsv25yvh7xz63gtm"],["Mercury", "https://ipfs.io/ipfs/bafybeih7z3ttmt43zwbgrf73h4y4cvswrje4ukkglpon3oxba75yfivoci"],["Venus", "https://ipfs.io/ipfs/bafybeiftovwaaialxbgj6ioox4xjwrexawcb3ck7u3fiwrdnyq26rwhsqa"],["Mars", "https://ipfs.io/ipfs/bafybeihemckwcg4b7qh34hgo4b2ptg2pate4gyxei5wpf4hcrqx3e3qg5e"],["Jupiter", "https://ipfs.io/ipfs/bafybeibabxdevfle7mft5uvosmyyqt7pgd3e6r5feyi4p6umvmhonvbrja"],["Saturn", "https://ipfs.io/ipfs/bafybeihujabcvgcz3cza6bnwcea5uduit364al5dueuhdatgqepzfxajru"], ["Uranus", "https://ipfs.io/ipfs/bafybeibarpjofit3sfyis2vwlo2pfqzqworn2msbcsy2dpkma7uhzwel2i"], ["Neptune", "https://ipfs.io/ipfs/bafybeigatylragz7d7knezlwh2cuxzlbribn37oenevx2tv7trmwnsjc2i"], ["Pluto", "https://ipfs.io/ipfs/bafybeib2fzmt2tewaxfin2owxu3qyiyfdlleaelq3ds5hdegrgyzat557u"]]);
+const signs = new Map([["Aries", "https://ipfs.io/ipfs/bafybeibb3vbuyws22sn46ntehzuurhyfvleywzeli7bgvkknph32rhvxmu/Aries.png"],["Taurus","https://ipfs.io/ipfs/bafybeidhmemze7fi6vhc4ey2dpyfdm3jiukrgineno6d6l6j4sbrajeovu/Taurus.png"], ["Gemini","https://ipfs.io/ipfs/bafybeiczqlr7hs3f6yszk4cw4ktoqeccr4eokhmqwbg45cqtjqtg44lrvq/Gemini.png"],["Cancer","https://ipfs.io/ipfs/bafybeidhw6oeks7xu6hxfv2ofvdmy3jnuropdiymfl5tzm2ts27co3iz5m/Cancer.png"],["Leo","https://ipfs.io/ipfs/bafybeidg7ibqmvyabxtlsfkb6wgc5zuz3pekxtphl6sqqcgu2utwzgex6u/Leo.png"],["Virgo","https://ipfs.io/ipfs/bafybeihcrijz7l5k4abo4fq67acovabd5joaoo6sqo4huwgrqrwkqcrccu/Virgo.png"], 
+["Libra","https://ipfs.io/ipfs/bafybeih5i67driw5rmtinyelkzf6r634jr52shw2ldwbddj7q6hhpgybcy/Libra.png"], ["Scorpio","https://ipfs.io/ipfs/bafybeihfmq7ht7y4oscndfp6yaiqsjoqa5sfxvefckinguqeant3h6sl4a/Scorpio.png"], ["Sagittarius","https://ipfs.io/ipfs/bafybeiciimvqst7pdl7ra5lzbrx4sh4pqli4neavlsxyzbami43yd7wl54/Sagittarius.png"], ["Capricorn","https://ipfs.io/ipfs/bafybeicgjqatcll33kgkn2lx6zfgzfcf7ththtiktt53zwvwyevpfte3tq/Capricorn.png"], ["Aquarius","https://ipfs.io/ipfs/bafybeigczwtrixvi6hdvdr5cevx4japleodv5rbrqljuelz75477obdgqa/Aquarius.png"], ["Pisces","https://ipfs.io/ipfs/bafybeialdlquk5f6cc75hjdh5evxvwovbfjg5o6b4cavjvcyjdn3u3ny6m/Pisces.png"]]);
+const planets = new Map([["Sun","https://ipfs.io/ipfs/bafybeicnmyzcf3ozqgyq2tgfcxojjylogoprjwkdf3tpywu2wcfkvetji4/Sun.png"],["Moon","https://ipfs.io/ipfs/bafybeidk6xqpwi4rhyralnr7nwkk2mpzm2ctp7r25weei2ydd67lepjbei/Moon.png"],["Mercury","https://ipfs.io/ipfs/bafybeihhn4yfd5smwoiiuohiissoqzwa23fljavmt6lacmqvfljvfosmbm/Mercury.png"],["Venus","https://ipfs.io/ipfs/bafybeih2ty4awpqwzjphcjmcmfsok3erltxcj6ps7ttvz7olnngvmuy64u/Venus.png"],["Mars","https://ipfs.io/ipfs/bafybeidqktns6cm4snodxymsl2yoyielsmcoqp36b6oevyqpxjyrh2f6sq/Mars.png"],
+["Jupiter","https://ipfs.io/ipfs/bafybeihhh2eq7yy7hjhbsgblnl4jef5b4n6rwiifaz74sbycv6ffdjfkgm/Jupiter.png"],["Saturn","https://ipfs.io/ipfs/bafybeiajfoh6ablj5cbn57lhtrm7uqtmxdbk7cy7ijtbdqteajxgitbnfi/Saturn.png"],["Uranus","https://ipfs.io/ipfs/bafybeia3zpj2lxz3zcqnwblu4s6m5ob76w4nhjwdndgci5mdebupbc5o6m/Uranus.png"],["Neptune","https://ipfs.io/ipfs/bafybeibhqxtb75gward3x53dq6llviqcfi46uh5luls32sjvvazali66ky/Neptune.png"],["Pluto","https://ipfs.io/ipfs/bafybeicojzrbcmzqyedq6uhvqvpe5vi4cnmrv62gpzekas3imc44kkahlm/Pluto.png"]]);
 const northnode = new Map([["Aries", ["01271949", "07261950", "08201967", "04191969", "04071986", "12021987", "12272004", "06222006", "07192023", "01112024"]], 
 ["Taurus", ["02201966","08191967","09121984","04061986", "04152003","12262004", "01182022","07182023"]], 
 ["Gemini", ["08261964","02191966","03171983","09111984","10142001","04142003","05062020","01182022"]],
@@ -20,23 +24,53 @@ const northnode = new Map([["Aries", ["01271949", "07261950", "08201967", "04191
 ["Capricorn", ["10101953","04021955","04281972","10271973","11191990","08011992","08212009","03022011","03272028","09232029"]], 
 ["Aquarius", ["03291952","10091953","11031970","04271972","05231989","11181990","12192007","08212009","04282026","03262028"]], 
 ["Pisces", ["07271950","03281952","04201969","11021970","12031987","05221989","06232006","12182007","01122024","04272026"]]]);
+const tokenURIArray = new Map([['Aries','ipfs://bafyreiacr5nixpq6c74yesql7yameiabdmvuru4csertahd3hdyvqf2gri/metadata.json'],['Taurus','ipfs://bafyreiddab7wpn3ofs5t4uc5k4iighlq5ekwbzmfm2obeqcnektxogtmwq/metadata.json'],['Gemini','ipfs://bafyreidjglh7lltrgnfauatx7ocsccocytrxwklblft2fyyvg2r35brqiy/metadata.json'],['Cancer','ipfs://bafyreicc4yt2ins2lijediwbff3jtedxb2gxsfgydorissb3afkxnvih6m/metadata.json'],['Leo','ipfs://bafyreieee4tkhryhh3mlg5ivyypntekynplcdfqp5uectrdug7lwx2b43y/metadata.json'],['Virgo','ipfs://bafyreigquas24vkv7udlibhafakbfcjnmv2nrm2a4qfbrts5bka2gpitz4/metadata.json'], ['Libra','ipfs://bafyreifiez7rgq6c6pej5xrd6a77htijqlw352uslqtlpw62vqyqj4cp7y/metadata.json'],['Scorpio','ipfs://bafyreigz4gcdqbuliyoqfkxj23x3dwk6hwqd6s5zwh3mlo5bsbpvro46hq/metadata.json'],['Sagittarius','ipfs://bafyreihras2bw26eesqbohueiqn2nddxm4a7csplrskcdngsqik7wnnel4/metadata.json'],['Capricorn','ipfs://bafyreievenvfxdsl4jhpfghfbwrx2metbwlbdedam5ztbxrqkb5vj7geui/metadata.json'],['Aquarius','ipfs://bafyreig5nmnm5cavlrijjoxumup7sm4i2r2rfmulsnsuzqsu4qq3je57zi/metadata.json'],['Pisces','ipfs://bafyreibhzinw3xevibbz6ekvq7zntt3ngeodz2hyguqrnirojcc3j43dhq/metadata.json'],['Sun','ipfs://bafyreidvwrxqxtqlwvinak77yx2yh7tuhh633npakoyet6vj3hivqhjzm4/metadata.json'],['Moon','ipfs://bafyreih45hu74mslr4ayqotfbmbfuhc7nppvtsrajqhisnuuy5ekg5zhhi/metadata.json'],['Mercury','ipfs://bafyreibb7g557u5g27v6l5tj6eykaqlnttgcmz34yyr53szqcf5mq4p6v4/metadata.json'],['Venus','ipfs://bafyreid5pyyg36u7jxrhqdhi3xxv7575pelzf4qc6fkx6jd36spbwvd3ai/metadata.json'],['Mars','ipfs://bafyreigdoh5jfseibsqg7plng74c4qomnmxugbd2mklsyk753knskl7q3q/metadata.json'],['Jupiter','ipfs://bafyreifve5nk3g4xmutz5lvl4rix5pwy5frnixa4lngryrvh5odl6jaqhq/metadata.json'],['Saturn','ipfs://bafyreid6ybl4yguh2ynqujprpeynh3xcxsag2ki7zfxmsqx3dqqsyvwo2e/metadata.json'],['Uranus','ipfs://bafyreih3aekkevkuvsskwd4hcw2frtzhl5j4ikfphjvloph4gf5ioeo7a4/metadata.json'],['Neptune','ipfs://bafyreigybsokkljrialy2x7b2gd7ukrsvcur5prvzrg4descsfuaws3hqa/metadata.json'],['Pluto','ipfs://bafyreiccslo76h7ko3uvfpq5u6bxf6pgnmb2apd34hf4f2oex3x47sytfm/metadata.json']])
 const client = new NFTStorage({ token: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJkaWQ6ZXRocjoweDlCRDhBODJiRDNGMjcyRjFCZDI1REYwNWZlOUZEMEM5QTRhYjA3QkYiLCJpc3MiOiJuZnQtc3RvcmFnZSIsImlhdCI6MTY5OTMzNzY3NDUyOCwibmFtZSI6Ikhvcm9zY29wZSBORlQifQ.p3WMoAfmaTDuczS_8FwUWyQt1iMPM-gZlYwAUtID2WI' })
+const CHAIN_ID = 80001;
+const NETWORK_NAME = "Mumbai";
 
 function App() {
-  const [date, setDate] = useState("1992-08-31");
-  const [time, setTime] = useState("15:00");
+  const [date, setDate] = useState("1979-01-19");
+  const [time, setTime] = useState("18:45");
   const [walletAddress, setwalletAddress] = useState(null);
-  const [FullName, setFullName] = useState(null);
+  const [FullName, setFullName] = useState("Dan");
   const [SunSign, setSunSign] = useState(null);
   const [RisingSign, setRisingSign] = useState(null);
-  const [ChartRuler, setChartRuler] = useState(null);
+  const [ChartRuler, setChartRuler] =  useState(null);
   const [NorthNodeSign, setNorthNodeSign] = useState(null);
-  //const allNFTs = [signs.get(SunSign),signs.get(RisingSign),planets.get(ChartRuler),signs.get(NorthNodeSign)];
   const [isMinting, setIsMinting] = useState(false);
   const [isStoring, setIsStoring] = useState(false);
-  const [name, setName] = useState("");
-  const [description, setDescription] = useState("");
-  const [file, setFile] = useState(null);
+  //const [NFTname, setNFTName] = useState("");
+  //const [NFTdescription, setNFTDescription] = useState("");
+  //const [NFTfile, setNFTFile] = useState(null);
+  const [readOnly, setreadOnly] = useState(false);
+
+  const getChainID = async(provider) => {
+    const {chainId} =  await provider.getNetwork();
+    if (chainId !== CHAIN_ID) {
+      setreadOnly(true);
+      window.alert(`Please switch to the ${NETWORK_NAME} network`);
+      throw new Error(`Please switch to the ${NETWORK_NAME} network`);
+    }
+  }
+
+  const getEthereumContract = () => {
+    try {
+      if (ethereum) {
+        const provider = new ethers.providers.Web3Provider(ethereum);
+        const signer = provider.getSigner();
+        getChainID(provider);
+        const transactionContract = new ethers.Contract(
+          ContractAddress,
+          ContractABI,
+          signer
+        );
+        return transactionContract;
+      }
+    } catch (error) {
+      console.log(error);
+    }
+  };
 
   const ConnectWallet = async () => {
     try {
@@ -56,6 +90,51 @@ function App() {
     }
     };
 
+    /*
+    const retrieveNFTData = async() => {
+      const transactionContract = getEthereumContract();
+      const allcids = await transactionContract.getAllChartElementNames();
+      psArray = allcids.split(" ");
+      console.log(psArray);
+      
+      for (var i=0; i<psArray.length; i++) {
+        let cid = psArray[i].slice(7,psArray[i].length); 
+        console.log(cid);
+        if (cid !== "") {
+          await fetch(`https://ipfs.io/ipfs/${cid}`)
+          .then(response => response.text())
+          .then(data => {
+          const obj = JSON.parse(data);
+          const image = obj.image;
+          const name = obj.name;
+          if (name === "Aries" || name === "Taurus" || name === "Gemini" || name === "Cancer" || name === "Leo" || name === "Virgo" || name === "Libra" || name === "Scorpio" || name === "Sagittarius" || name === "Capricorn" || name === "Aquarius" || name === "Pisces") 
+          {
+            signs.set(name, "https://ipfs.io/ipfs/".concat(image.slice(7,image.length)));
+          }
+          else if (name === "Sun" || name === "Moon" || name === "Mercury" || name === "Venus" || name === "Mars" || name === "Jupiter" || name === "Saturn" || name === "Uranus" || name === "Neptune" || name === "Pluto"){
+            planets.set(name, "https://ipfs.io/ipfs/".concat(image.slice(7,image.length)));
+          }})
+        }
+      }
+      };
+    */
+    const storeNFT = async() => {
+      const metadata = await client.store({name:"Sun Sign", description:"The Sun rules your inner will", image: new File([".\\src\\assets\\signs\\".concat(SunSign).concat(".png")], SunSign.concat('.png'), {type: 'image/png'})});
+      const cid = metadata.url.replace('ipfs://','');
+      allNFTs.push(cid);
+      const metadata2 = await client.store({name:"Rising Sign", description:"The Rising Sign is how the world sees you", image: new File([".\\src\\assets\\signs\\".concat(RisingSign).concat(".png")], RisingSign.concat('.png'), {type: 'image/png'})});
+      const cid2 = metadata2.url.replace('ipfs://','');
+      allNFTs.push(cid2);
+      const metadata3 = await client.store({name:"Chart Ruler", description:"The Chart Rules influences on how you approach everything in life", image: new File([".\\src\\assets\\signs\\".concat(ChartRuler).concat(".png")], ChartRuler.concat('.png'), {type: 'image/png'})});
+      const cid3 = metadata3.url.replace('ipfs://','');
+      allNFTs.push(cid3);
+      const metadata4 = await client.store({name:"North Node", description:"The North Node describes your life potential and karma", image: new File([".\\src\\assets\\signs\\".concat(NorthNodeSign).concat(".png")], NorthNodeSign.concat('.png'), {type: 'image/png'})});
+      const cid4 = metadata4.url.replace('ipfs://','');
+      allNFTs.push(cid4);
+      console.log(allNFTs);
+    };
+    
+
     useEffect(() => {
       calculateSunSign(date);
       calculateRisingSign(time);
@@ -63,27 +142,22 @@ function App() {
       calculatenorthnode(date);
     });
 
-    const storeNFT = async() => {
-      const metadata = await client.store({name:name, description:description, image: new File([file], 'nft.png', {type: 'image/png'})});
-      const cid = metadata.url.replace('ipfs://','');
-      console.log(cid);
-    }
-
-    async function mintNFT(allNFTs) {
+    async function mintNFT() {
       setIsMinting(true);
-      /*try {
-        //for (var i = 0; i < allNFTs.length; i++) {
-          //const transaction = await NFTContract.mintNFT(account, allNFTs[i]);
-        // Pay gas fees and wait for the transaction to be confirmed
-        //await transaction.wait();
-        //}
+      try {
+        const transactionContract = getEthereumContract();
+        for (var i = 0; i < allNFTs.length; i++) {
+          const transaction = await transactionContract.mintNFT("ipfs://".concat(allNFTs[i]));
+        //Pay gas fees and wait for the transaction to be confirmed
+        await transaction.wait();
+        }
         // Transaction is confirmed, you can perform any additional actions here if needed
       } catch (e) {
         // Handle errors
       } finally {
         setIsMinting(false);
-      }*/
-    }
+      }
+    };
 
     function calculateRisingSign(time) {
       var finalRisingSignArray = [];
@@ -106,19 +180,17 @@ function App() {
       risingSignTimes.set(finalRisingSignArray[4], [12,13])
       risingSignTimes.set(finalRisingSignArray[5], [14,15])
       risingSignTimes.set(finalRisingSignArray[6], [16,17])
-      risingSignTimes.set(finalRisingSignArray[7], [16,19])
+      risingSignTimes.set(finalRisingSignArray[7], [18,19])
       risingSignTimes.set(finalRisingSignArray[8], [20,21])
       risingSignTimes.set(finalRisingSignArray[9], [22,23])
       risingSignTimes.set(finalRisingSignArray[10], [0,1])
       risingSignTimes.set(finalRisingSignArray[11], [2,3])
-
       const risingSignValue = Number(time.slice(0,2));
-
       for (let [key, value] of risingSignTimes) {
         if (risingSignValue === value[0] || risingSignValue === value[1])
         setRisingSign(key);
         }
-    }
+    };
 
     function calculatechartRuler(){
       const chartRulerMap = new Map();
@@ -136,7 +208,7 @@ function App() {
       chartRulerMap.set(zodiacSignArray[11], "Neptune");
       const RulingPlanet = chartRulerMap.get(RisingSign);
       setChartRuler(RulingPlanet);
-    }
+    };
 
     function calculateSunSign(date) {
       let dateObject = new Date(date);
@@ -215,7 +287,7 @@ function App() {
           setSunSign("Sagittarius");
         }
       }
-    }
+    };
     
     function calculatenorthnode(date) {
       let dateObject = new Date(date);
@@ -233,32 +305,27 @@ function App() {
           if (year > year2 && year < year3) {
                 setNorthNodeSign(key);
           }
-
           else if (year === year2 && month > month2){
                 setNorthNodeSign(key);
           }
-
           else if (year === year2 && month === month2 && day > day2){
                 setNorthNodeSign(key);
           }
-
           else if (year === year3 && month < month3){
                 setNorthNodeSign(key);
           }
-
           else if (year === year3 && month === month2 && day < day3){
             setNorthNodeSign(key);
           }
-        }
-        }
-      }
+        }}};
+
   function handleDateInput({ target }) {
       setDate(target.value);
-  }
+  };
 
   function handleTimeInput({ target }) {
     setTime(target.value);
-}
+  };
 
   return (
     <div className="App">
@@ -270,43 +337,45 @@ function App() {
           : (<p> Wallet Address Connected </p>)}
       </div>
       <div>
-          <label> <b>Store Assets on NFTStorage</b> </label>
+          {/*<label> <b>Store Assets on NFTStorage</b> </label>
           <br />
           <label>NFT Name: &nbsp;</label>
-          <input type = "text" value = {name} onChange={(e) => setName(e.target.value)} placeholder = "Name"/> 
+          <input type = "text" value = {NFTname} disabled = {readOnly} onChange={(e) => setNFTName(e.target.value)} placeholder = "Name"/> 
           <br />
           <label>NFT Description: &nbsp;</label>
-          <input type = "text" value = {description} onChange={(e) => setDescription(e.target.value)} placeholder = "Description"/>
+          <input type = "text" value = {NFTdescription} disabled = {readOnly} onChange={(e) => setNFTDescription(e.target.value)} placeholder = "Description"/>
           <br />
           <label>NFT File: &nbsp;</label>
-          <input type = "file" onChange={(e) => setFile(e.target.files[0])} placeholder = "File Path"/>
+          <input type = "file" disabled = {readOnly} onChange={(e) => setNFTFile(e.target.files[0])} placeholder = "File Path"/>
           <br />
           <br />
-          <button disabled={isStoring} onClick={storeNFT}> {isMinting ? "Storing..." : "Store"} </button>
+          <button disabled={isStoring} onClick={storeNFT}> {isStoring ? "Storing..." : "Store"} </button>
           <br />
-          <br />
-          <br />
-          <label><b>Enter Chart Details</b></label>
+          <br />*/}
+          <label><b>Enter Horoscope Chart Details</b></label>
           <br />
           <label>Enter Full Name: &nbsp;</label>
-          <input type = "text" placeholder = "Enter your full name" onChange={(e)=>(setFullName(e.target.value))}/>
+          <input type = "text" defaultValue = {FullName} placeholder = "Enter your full name" disabled = {readOnly} onChange={(e)=>(setFullName(e.target.value))}/>
           <br />
           <label>Enter Date and Time: &nbsp;</label>
-          <input onChange={handleDateInput} value={date} type="date" id="dob" />
-          <input onChange={handleTimeInput} value={time} type="time" id="tob" />
+          <input onChange={handleDateInput} value={date} disabled = {readOnly} type="date" id="dob" />
+          <input onChange={handleTimeInput} value={time} disabled = {readOnly} type="time" id="tob" />
           <br />
           <br />
-          <br />
-          <label><b>Chart Summary</b></label>
-          <br />
-          <label> &emsp; Sun Sign &emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; Rising Sign &emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; Chart Ruler &emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; North Node </label>
-          <br />
-          <img src={signs.get(SunSign)} width={225} height={225} alt="Sunsign" />
-          <img src={signs.get(RisingSign)} width={225} height={225} alt="Risingsign" />
-          <img src={planets.get(ChartRuler)} width={225} height={225} alt="ChartRuler" />
-          <img src={signs.get(NorthNodeSign)} width={225} height={225} alt="NorthNode" />
+          <h3><b>Horoscope Chart Summary</b></h3>
+          <label> <b>Full Name:</b> {FullName}</label>
           <br />
           <br />
+          <label> <b>&emsp; Sun Sign &emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; Rising Sign &emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; &emsp; Chart Ruler &emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; North Node </b></label>
+          <br />
+          <br />
+          <img src={signs.get(SunSign)} width={250} height={250} alt="Sunsign" />
+          <img src={signs.get(RisingSign)} width={250} height={250} alt="Risingsign" />
+          <img src={planets.get(ChartRuler)} width={250} height={250} alt="ChartRuler" />
+          <img src={signs.get(NorthNodeSign)} width={250} height={250} alt="NorthNode" />
+          <br />
+          <br />
+          <button disabled={isStoring} onClick={storeNFT}> {isStoring ? "Storing..." : "Store"} </button>
           <button disabled={isMinting} onClick={mintNFT}>
           {isMinting ? "Minting..." : "Mint"}
       </button>
@@ -314,5 +383,6 @@ function App() {
       </header>
     </div>
   );
-}  
+}
+
 export default App;
