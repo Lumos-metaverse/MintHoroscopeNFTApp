@@ -1,9 +1,9 @@
+import React, {useState,useEffect} from "react";
+import {NFTStorage} from 'nft.storage';
+import { ContractABI, ContractAddress } from "./utils/contractdeets";
 import Logo from "./components/Logo";
 import Header from "./components/Header";
-import {NFTStorage,File} from 'nft.storage';
 import './App.css';
-import React, {useState,useEffect} from "react";
-import { ContractABI, ContractAddress } from "./utils/contractdeets";
 const ethers = require("ethers");
 const {ethereum} = window;
 const allNFTs = [];
@@ -24,12 +24,14 @@ const northnode = new Map([["Aries", ["01271949", "07261950", "08201967", "04191
 ["Capricorn", ["10101953","04021955","04281972","10271973","11191990","08011992","08212009","03022011","03272028","09232029"]], 
 ["Aquarius", ["03291952","10091953","11031970","04271972","05231989","11181990","12192007","08212009","04282026","03262028"]], 
 ["Pisces", ["07271950","03281952","04201969","11021970","12031987","05221989","06232006","12182007","01122024","04272026"]]]);
-const tokenURIArray = new Map([['Aries','ipfs://bafyreiacr5nixpq6c74yesql7yameiabdmvuru4csertahd3hdyvqf2gri/metadata.json'],['Taurus','ipfs://bafyreiddab7wpn3ofs5t4uc5k4iighlq5ekwbzmfm2obeqcnektxogtmwq/metadata.json'],['Gemini','ipfs://bafyreidjglh7lltrgnfauatx7ocsccocytrxwklblft2fyyvg2r35brqiy/metadata.json'],['Cancer','ipfs://bafyreicc4yt2ins2lijediwbff3jtedxb2gxsfgydorissb3afkxnvih6m/metadata.json'],['Leo','ipfs://bafyreieee4tkhryhh3mlg5ivyypntekynplcdfqp5uectrdug7lwx2b43y/metadata.json'],['Virgo','ipfs://bafyreigquas24vkv7udlibhafakbfcjnmv2nrm2a4qfbrts5bka2gpitz4/metadata.json'], ['Libra','ipfs://bafyreifiez7rgq6c6pej5xrd6a77htijqlw352uslqtlpw62vqyqj4cp7y/metadata.json'],['Scorpio','ipfs://bafyreigz4gcdqbuliyoqfkxj23x3dwk6hwqd6s5zwh3mlo5bsbpvro46hq/metadata.json'],['Sagittarius','ipfs://bafyreihras2bw26eesqbohueiqn2nddxm4a7csplrskcdngsqik7wnnel4/metadata.json'],['Capricorn','ipfs://bafyreievenvfxdsl4jhpfghfbwrx2metbwlbdedam5ztbxrqkb5vj7geui/metadata.json'],['Aquarius','ipfs://bafyreig5nmnm5cavlrijjoxumup7sm4i2r2rfmulsnsuzqsu4qq3je57zi/metadata.json'],['Pisces','ipfs://bafyreibhzinw3xevibbz6ekvq7zntt3ngeodz2hyguqrnirojcc3j43dhq/metadata.json'],['Sun','ipfs://bafyreidvwrxqxtqlwvinak77yx2yh7tuhh633npakoyet6vj3hivqhjzm4/metadata.json'],['Moon','ipfs://bafyreih45hu74mslr4ayqotfbmbfuhc7nppvtsrajqhisnuuy5ekg5zhhi/metadata.json'],['Mercury','ipfs://bafyreibb7g557u5g27v6l5tj6eykaqlnttgcmz34yyr53szqcf5mq4p6v4/metadata.json'],['Venus','ipfs://bafyreid5pyyg36u7jxrhqdhi3xxv7575pelzf4qc6fkx6jd36spbwvd3ai/metadata.json'],['Mars','ipfs://bafyreigdoh5jfseibsqg7plng74c4qomnmxugbd2mklsyk753knskl7q3q/metadata.json'],['Jupiter','ipfs://bafyreifve5nk3g4xmutz5lvl4rix5pwy5frnixa4lngryrvh5odl6jaqhq/metadata.json'],['Saturn','ipfs://bafyreid6ybl4yguh2ynqujprpeynh3xcxsag2ki7zfxmsqx3dqqsyvwo2e/metadata.json'],['Uranus','ipfs://bafyreih3aekkevkuvsskwd4hcw2frtzhl5j4ikfphjvloph4gf5ioeo7a4/metadata.json'],['Neptune','ipfs://bafyreigybsokkljrialy2x7b2gd7ukrsvcur5prvzrg4descsfuaws3hqa/metadata.json'],['Pluto','ipfs://bafyreiccslo76h7ko3uvfpq5u6bxf6pgnmb2apd34hf4f2oex3x47sytfm/metadata.json']])
-const client = new NFTStorage({ token: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJkaWQ6ZXRocjoweDlCRDhBODJiRDNGMjcyRjFCZDI1REYwNWZlOUZEMEM5QTRhYjA3QkYiLCJpc3MiOiJuZnQtc3RvcmFnZSIsImlhdCI6MTY5OTMzNzY3NDUyOCwibmFtZSI6Ikhvcm9zY29wZSBORlQifQ.p3WMoAfmaTDuczS_8FwUWyQt1iMPM-gZlYwAUtID2WI' })
 const CHAIN_ID = 80001;
 const NETWORK_NAME = "Mumbai";
+const client = new NFTStorage({ token: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJkaWQ6ZXRocjoweDlCRDhBODJiRDNGMjcyRjFCZDI1REYwNWZlOUZEMEM5QTRhYjA3QkYiLCJpc3MiOiJuZnQtc3RvcmFnZSIsImlhdCI6MTY5OTMzNzY3NDUyOCwibmFtZSI6Ikhvcm9zY29wZSBORlQifQ.p3WMoAfmaTDuczS_8FwUWyQt1iMPM-gZlYwAUtID2WI' })
 
 function App() {
+  const [NFTname, setNFTName] = useState("");
+  const [NFTdescription, setNFTDescription] = useState("");
+  const [NFTfile, setNFTFile] = useState(null);
   const [date, setDate] = useState("1979-01-19");
   const [time, setTime] = useState("18:45");
   const [walletAddress, setwalletAddress] = useState(null);
@@ -38,11 +40,11 @@ function App() {
   const [RisingSign, setRisingSign] = useState(null);
   const [ChartRuler, setChartRuler] =  useState(null);
   const [NorthNodeSign, setNorthNodeSign] = useState(null);
+  const [SS, setSS] = useState(false);
+  const [RS, setRS] = useState(false);
+  const [CR, setCR] = useState(false);
+  const [NNS, setNNS] = useState(false);
   const [isMinting, setIsMinting] = useState(false);
-  const [isStoring, setIsStoring] = useState(false);
-  //const [NFTname, setNFTName] = useState("");
-  //const [NFTdescription, setNFTDescription] = useState("");
-  //const [NFTfile, setNFTFile] = useState(null);
   const [readOnly, setreadOnly] = useState(false);
 
   const getChainID = async(provider) => {
@@ -53,7 +55,6 @@ function App() {
       throw new Error(`Please switch to the ${NETWORK_NAME} network`);
     }
   }
-
   const getEthereumContract = () => {
     try {
       if (ethereum) {
@@ -89,50 +90,6 @@ function App() {
       console.log(error);
     }
     };
-
-    /*
-    const retrieveNFTData = async() => {
-      const transactionContract = getEthereumContract();
-      const allcids = await transactionContract.getAllChartElementNames();
-      psArray = allcids.split(" ");
-      console.log(psArray);
-      
-      for (var i=0; i<psArray.length; i++) {
-        let cid = psArray[i].slice(7,psArray[i].length); 
-        console.log(cid);
-        if (cid !== "") {
-          await fetch(`https://ipfs.io/ipfs/${cid}`)
-          .then(response => response.text())
-          .then(data => {
-          const obj = JSON.parse(data);
-          const image = obj.image;
-          const name = obj.name;
-          if (name === "Aries" || name === "Taurus" || name === "Gemini" || name === "Cancer" || name === "Leo" || name === "Virgo" || name === "Libra" || name === "Scorpio" || name === "Sagittarius" || name === "Capricorn" || name === "Aquarius" || name === "Pisces") 
-          {
-            signs.set(name, "https://ipfs.io/ipfs/".concat(image.slice(7,image.length)));
-          }
-          else if (name === "Sun" || name === "Moon" || name === "Mercury" || name === "Venus" || name === "Mars" || name === "Jupiter" || name === "Saturn" || name === "Uranus" || name === "Neptune" || name === "Pluto"){
-            planets.set(name, "https://ipfs.io/ipfs/".concat(image.slice(7,image.length)));
-          }})
-        }
-      }
-      };
-    */
-    const storeNFT = async() => {
-      const metadata = await client.store({name:"Sun Sign", description:"The Sun rules your inner will", image: new File([".\\src\\assets\\signs\\".concat(SunSign).concat(".png")], SunSign.concat('.png'), {type: 'image/png'})});
-      const cid = metadata.url.replace('ipfs://','');
-      allNFTs.push(cid);
-      const metadata2 = await client.store({name:"Rising Sign", description:"The Rising Sign is how the world sees you", image: new File([".\\src\\assets\\signs\\".concat(RisingSign).concat(".png")], RisingSign.concat('.png'), {type: 'image/png'})});
-      const cid2 = metadata2.url.replace('ipfs://','');
-      allNFTs.push(cid2);
-      const metadata3 = await client.store({name:"Chart Ruler", description:"The Chart Rules influences on how you approach everything in life", image: new File([".\\src\\assets\\signs\\".concat(ChartRuler).concat(".png")], ChartRuler.concat('.png'), {type: 'image/png'})});
-      const cid3 = metadata3.url.replace('ipfs://','');
-      allNFTs.push(cid3);
-      const metadata4 = await client.store({name:"North Node", description:"The North Node describes your life potential and karma", image: new File([".\\src\\assets\\signs\\".concat(NorthNodeSign).concat(".png")], NorthNodeSign.concat('.png'), {type: 'image/png'})});
-      const cid4 = metadata4.url.replace('ipfs://','');
-      allNFTs.push(cid4);
-      console.log(allNFTs);
-    };
     
     useEffect(() => {
       calculateSunSign(date);
@@ -144,12 +101,45 @@ function App() {
     async function mintNFT() {
       setIsMinting(true);
       try {
-        const transactionContract = getEthereumContract();
-        for (var i = 0; i < allNFTs.length; i++) {
-          const transaction = await transactionContract.mintNFT("ipfs://".concat(allNFTs[i]));
-        //Pay gas fees and wait for the transaction to be confirmed
-        await transaction.wait();
+        if (NFTname === "Sun Sign" && allNFTs.length < 4 && SS === false) {
+          const metadata = await client.store({name:NFTname, description:NFTdescription, image: new File([NFTfile], SunSign.concat('.png'), {type: 'image/png'})});
+          allNFTs.push(metadata.url);
+          setSS(true);
+          alert("Sun Sign NFT uploaded to NFT.Storage. Next: Rising Sign");
         }
+        else if (NFTname === "Rising Sign" && allNFTs.length < 4 && RS === false) {
+          const metadata = await client.store({name:NFTname, description:NFTdescription, image: new File([NFTfile], RisingSign.concat('.png'), {type: 'image/png'})});
+          allNFTs.push(metadata.url);
+          setRS(true);
+          alert("Rising Sign NFT uploaded to NFT.Storage. Next: Chart Ruler");
+        }
+        else if (NFTname === "Chart Ruler" && allNFTs.length < 4 && CR === false) {
+          const metadata = await client.store({name:NFTname, description:NFTdescription, image: new File([NFTfile], ChartRuler.concat('.png'), {type: 'image/png'})});
+          allNFTs.push(metadata.url);
+          setCR(true);
+          alert("Chart Ruler NFT uploaded to NFT.Storage. Next: North Node Sign");
+        }
+
+        else if (NFTname === "North Node Sign" && allNFTs.length < 4 && NNS === false) {
+          const metadata = await client.store({name:NFTname, description:NFTdescription, image: new File([NFTfile], NorthNodeSign.concat('.png'), {type: 'image/png'})});
+          allNFTs.push(metadata.url);
+          setNNS(true);
+          alert("North Node Sign NFT uploaded to NFT.Storage. And we are done!");
+        }
+
+        else {
+          alert("ERROR: Incorrect or empty NFT Name given. Try again!");
+        }
+
+        if (allNFTs.length === 4) {
+          for (var i = 0; i < allNFTs.length; i++) {
+            const transactionContract = getEthereumContract();
+            const transaction = await transactionContract.mintNFT(allNFTs[i]); 
+            //Pay gas fees and wait for the transaction to be confirmed
+            await transaction.wait();
+          }
+        }
+        
         // Transaction is confirmed, you can perform any additional actions here if needed
       } catch (e) {
         // Handle errors
@@ -336,21 +326,6 @@ function App() {
           : (<p> Wallet Address Connected </p>)}
       </div>
       <div>
-          {/*<label> <b>Store Assets on NFTStorage</b> </label>
-          <br />
-          <label>NFT Name: &nbsp;</label>
-          <input type = "text" value = {NFTname} disabled = {readOnly} onChange={(e) => setNFTName(e.target.value)} placeholder = "Name"/> 
-          <br />
-          <label>NFT Description: &nbsp;</label>
-          <input type = "text" value = {NFTdescription} disabled = {readOnly} onChange={(e) => setNFTDescription(e.target.value)} placeholder = "Description"/>
-          <br />
-          <label>NFT File: &nbsp;</label>
-          <input type = "file" disabled = {readOnly} onChange={(e) => setNFTFile(e.target.files[0])} placeholder = "File Path"/>
-          <br />
-          <br />
-          <button disabled={isStoring} onClick={storeNFT}> {isStoring ? "Storing..." : "Store"} </button>
-          <br />
-          <br />*/}
           <label><b>Enter Horoscope Chart Details</b></label>
           <br />
           <label>Enter Full Name: &nbsp;</label>
@@ -361,8 +336,7 @@ function App() {
           <input onChange={handleTimeInput} value={time} disabled = {readOnly} type="time" id="tob" />
           <br />
           <br />
-          <h3><b>Horoscope Chart Summary</b></h3>
-          <label> <b>Full Name:</b> {FullName}</label>
+          <label><b>Horoscope Chart Details</b></label>
           <br />
           <br />
           <label> <b>&emsp; Sun Sign &emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; Rising Sign &emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; &emsp; Chart Ruler &emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; North Node </b></label>
@@ -374,9 +348,19 @@ function App() {
           <img src={signs.get(NorthNodeSign)} width={250} height={250} alt="NorthNode" />
           <br />
           <br />
-          <button disabled={isStoring} onClick={storeNFT}> {isStoring ? "Storing..." : "Store"} </button>
-          <button disabled={isMinting} onClick={mintNFT}>
-          {isMinting ? "Minting..." : "Mint"}
+          <label> <b>Mint Horoscope Chart Details as NFTs</b> </label>
+          <br />
+          <label>NFT Name: &nbsp;</label>
+          <input type = "text" value = {NFTname} disabled = {readOnly} onChange={(e) => setNFTName(e.target.value)} placeholder = "Name"/> 
+          <br />
+          <label>NFT Description: &nbsp;</label>
+          <input type = "text" value = {NFTdescription} disabled = {readOnly} onChange={(e) => setNFTDescription(e.target.value)} placeholder = "Description"/>
+          <br />
+          <label>NFT File: &nbsp;</label>
+          <input type = "file" disabled = {readOnly} onChange={(e) => setNFTFile(e.target.files[0])} placeholder = "File Path"/>               
+          <br />
+          <br />
+          <button disabled={isMinting} onClick={mintNFT}>{isMinting ? "Minting..." : "Mint"}
       </button>
       </div>
       </header>
