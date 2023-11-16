@@ -326,7 +326,7 @@ function App() {
           : (<p> Wallet Address Connected </p>)}
       </div>
       <div>
-          <label><b>Enter Horoscope Chart Details</b></label>
+          <label><b>Enter Your Time and Date of Birth</b></label>
           <br />
           <label>Enter Full Name: &nbsp;</label>
           <input type = "text" defaultValue = {FullName} placeholder = "Enter your full name" disabled = {readOnly} onChange={(e)=>(setFullName(e.target.value))}/>
