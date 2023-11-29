@@ -339,7 +339,7 @@ function App() {
           <label><b>Horoscope Chart Details</b></label>
           <br />
           <br />
-          <label> <b>&emsp; Sun Sign &emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; Rising Sign &emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; &emsp; Chart Ruler &emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; North Node </b></label>
+          <label> <b>&emsp; Sun Sign &emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; Rising Sign &emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; &emsp; Chart Ruler &emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; North Node Sign </b></label>
           <br />
           <br />
           <img src={signs.get(SunSign)} width={250} height={250} alt="Sunsign" />
